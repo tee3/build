@@ -13,9 +13,9 @@ B2 V2 release procedure.
    if not already closed. Move to a later milestone, or fix all the unfixed
    ones.
 
-   Make sure that "bjam --version" output is correct. Update version string if
+   Make sure that ``bjam --version`` output is correct. Update version string if
    needed. Update bjam version and the version check is necessary.
-   Check the download locations in "index.html". Check that "last modified"
+   Check the download locations in ``index.html``. Check that "last modified"
    string in index.html is correct.
 
 2. Make sure you don't have any local modification, and create SVN directory
@@ -79,10 +79,10 @@ B2 V2 release procedure.
 10. Announce the release, etc.
 
 11. Login to SF and update the current-release redirects in
-    /home/groups/b/bo/boost/htdocs/boost-build2/.htaccess.
+    ``/home/groups/b/bo/boost/htdocs/boost-build2/.htaccess``.
 
 12. If any issues were found during release in this document or in
     test-config-example.jam, commit those changes. The release need
     not be redone, but changes must be committed.
 
-13. Set release date in changes.txt and commit.
+13. Set release date in ``changes.txt`` and commit.
