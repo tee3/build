@@ -1,6 +1,6 @@
-Copyright 2004-2007 Vladimir Prus 
-Distributed under the Boost Software License, Version 1.0. 
-(See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt) 
+Copyright 2004-2007 Vladimir Prus
+Distributed under the Boost Software License, Version 1.0.
+(See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 Milestone 13 (in development)
 
@@ -14,7 +14,7 @@ Milestone 12 (Oct 1, 2007)
 
 Changes in this release:
 
-    - The Pathscale, PGI and mipspro compilers are now supported.    
+    - The Pathscale, PGI and mipspro compilers are now supported.
     - Support for autoconfiguration of toolset based on command-line
       toolset=xxxx request, and for default toolset
       configuration as a fallback.
@@ -34,7 +34,7 @@ Changes in this release:
     - The executables produced by the 'run' rule are automatically
     removed after run.
     - The gcc toolset uses the version obtained by running
-    the compiler, if no explicit one is provided.    
+    the compiler, if no explicit one is provided.
     - The sun toolset now supports the 'address-model' feature,
     and uses -KPIC for shared libraries.
     - Free features on command line affect all targets, not
@@ -78,54 +78,54 @@ Changes in this release:
         - Jamfiles can now contain project-specific help messages.
         - "Indirect conditional requirements" introduced
           (http://tinyurl.com/mn3jp)
-        - Strip suffix in main target names when computing names of generated 
-          files (URL) 
-        - The 'source-location' project attribute can contain 
+        - Strip suffix in main target names when computing names of generated
+          files (URL)
+        - The 'source-location' project attribute can contain
           several directories.
-        - Usage requirements are propagated not only direct dependents, 
+        - Usage requirements are propagated not only direct dependents,
           but to indirect dependents.
 
     - Command line option changes (see http://tinyurl.com/zbycz)
         - New option --build-dir
         - The --clean option cleans only target below the current directory,
-          not globally. 
+          not globally.
         - New --clean-all option was added.
         - New option --debug-building
-        - Running "bjam some_directory" works even if there's no Jamfile 
+        - Running "bjam some_directory" works even if there's no Jamfile
           in the current directory.
 
     - Toolset improvements:
         - Assembling support with gcc, borland and msvc.
         - Support amd64/ia64 cross-compiling with msvc.
         - Improved, registry-based autodetection for msvc.
-        - Serialize execution of gcc.link actions  
-        - Precompiled headers supported on MSVC 
+        - Serialize execution of gcc.link actions
+        - Precompiled headers supported on MSVC
           (Need documentation)
 
-    - New features <warnings> and <warnings-as-errors>           
+    - New features <warnings> and <warnings-as-errors>
     - The 'glob' rule accepts wildcards in directory names.
-    - The 'stage' rule was renamed to 'install' 
+    - The 'stage' rule was renamed to 'install'
       (the old name still available for compatibility)
     - The <tag> feature can accept user-defined function as value
       (URL)
     - The 'install' rule can install a directory hierarchy preserving relative
       paths.
-    - The 'install' rule no longer allows to change library 
+    - The 'install' rule no longer allows to change library
       name during install.
     - The Jamfile referred via 'use-project' may declare project id different
       from the one in 'use-project'.
     - The 'using' rule now searches the directory of containing Jamfile.
-     
+
 
 The following bugs were fixed:
 
     - The <library> feature was ignored for static linking
     - Fix #include scanning for C files.
     - Child projects were sometimes loaded before parent projects.
-    - Fix project references with absolute paths on Windows. 
+    - Fix project references with absolute paths on Windows.
     - The <dependency> feature was ignored for 'install' targets.
     - A generator having the same type in sources and targets was causing hang.
-    - Use 'icpc' command for Intel, fixing errors with 8.1 and higher. 
+    - Use 'icpc' command for Intel, fixing errors with 8.1 and higher.
     - Generation of PS files with the FOP tool really produces .PS files.
     - No dependency scanning was done for C files.
     - The 'constant' and 'path-constant' rules did not accept multi-element
@@ -135,12 +135,12 @@ The following bugs were fixed:
     - Fix rpath setting on Intel/Linux.
     - The 'install' rule don't unnecessary scans #includes in installed
       headers.
-       
+
 
 Developer visible changes:
 
     - Ability to customize type's prefix depending on build properties.
-    - Generator's 'run' method can return usage-requirements.  
+    - Generator's 'run' method can return usage-requirements.
     - Main target rule is automatically declared for each new target type.
     - 'Link incompatible' feature attribute was removed
     - Generators no longer bypass unhandled sources, they just ignore them.
@@ -163,7 +163,7 @@ Changes in this release:
     Many toolsets were added: Intel, Metrowerks, Comeau, aCC, vacpp.
     Documentation was converted to BoostBook and improved.
     Performance was improved.
- 
+
     - Toolsets initialization syntax is much more uniform. Compiler and linker
       flags can now be specified.
     - The algorithm for computing build properties was improved. Conditional
@@ -176,16 +176,16 @@ Changes in this release:
     - The <file> feature now works only for libraries.
     - Simpler syntax for "searched" libraries was added.
     - New <dependency> feature.
-    
 
-    Unix: 
+
+    Unix:
         The right order of static libraries on Unix is automatically
-        computed. 
+        computed.
         The <hardcode-dll-paths> feature is the default.
-    gcc: 
-         The -fPIC option is passed when creating shared libraries. 
+    gcc:
+         The -fPIC option is passed when creating shared libraries.
          Problems with distcc were solved.
-    Sun:         
+    Sun:
          It's now possible to use the sun linker (as opposed to gnu), and
          to compile C files.
     Darwin:
@@ -218,10 +218,10 @@ Developer visible changes:
     - Support for VMS paths was added.
 
 Thanks to Christopher Currie, Pedro Ferreira, Philipp Frauenfelder,
-Andre Hentz, Jurgen Hunold, Toon Knapen, Johan Nilsson, Alexey Pakhunov, 
-Brock Peabody, Michael Stevens and Zbynek Winkler who contributed 
+Andre Hentz, Jurgen Hunold, Toon Knapen, Johan Nilsson, Alexey Pakhunov,
+Brock Peabody, Michael Stevens and Zbynek Winkler who contributed
 code to this release.
- 
+
 
 Milestone 9.1 (Nov 6, 2003)
 
@@ -237,7 +237,7 @@ Changes in this release
     - Putting library in sources of other library now works even for static
       linking, which makes expressing library->library dependency much
       simpler.
-    - Performance was considerably improved.      
+    - Performance was considerably improved.
     - Regression testing framework now works on windows.
     - The "alias" rule can have usage requirements and passes on usage
       requirements of sources.
@@ -251,7 +251,7 @@ The following bugs were fixed:
     - It was not possible to specify empty suffix for a target type derived
       from other type.
     - The stage rules used to generate incorrect suffix in some cases.
-    - It was possible to load Jamfile twice. 
+    - It was possible to load Jamfile twice.
     - The 'use-project' rule was broken when referring to a child project.
     - Use of composite properties in requirements did not work.
 
@@ -261,19 +261,19 @@ Developer visible changes:
     - Source layout was reorganized.
     - Handling of response file was simplified.
 
-Thanks to Pedro Ferreira, Kirill Lapshin, Andre Hentz, Paul Lin, 
-Jurgen Hunold, Christopher Currie, and Brock Peabody, who contributed to 
+Thanks to Pedro Ferreira, Kirill Lapshin, Andre Hentz, Paul Lin,
+Jurgen Hunold, Christopher Currie, and Brock Peabody, who contributed to
 this release.
 
 Milestone 8 (Oct 15, 2003)
 
 Changes in this release:
- 
+
     - A regression testing framework was implemented.
-    - New <implicit-dependency> feature was added for better handling 
+    - New <implicit-dependency> feature was added for better handling
       of dependencies to generated headers.
     - The link-compatibility checks not longer cause projects to be skipped,
-      and issue warning, not error, for main targets.    
+      and issue warning, not error, for main targets.
     - Algorithm for selecting main target alternative was improved.
     - The <dependency> feature was renamed to <use>.
     - Project root constants were made available in project root itself.
@@ -289,7 +289,7 @@ Milestone 7 (Sep 11, 2003)
 Changes in this release:
 
     - Performance was improved.
-    - Support for Sun and Darwin toolsets was added.    
+    - Support for Sun and Darwin toolsets was added.
     - <tag> feature, which changes the name of target depending of build
       variant, was implemented.
     - Old-style targets-ids are no longer supported.
@@ -302,16 +302,15 @@ The following bugs were fixed:
       main target alternatives.
     - broken toolset inheritance
     - hard error after skipping a target due to incompatible requirements
-    - incorrect behaviour of a generator when producing several targets of 
+    - incorrect behaviour of a generator when producing several targets of
       the same type
     - errors on use of the 'project-root' rule in Jamfile context
-    - inability to require specific compiler version for a main target.    
+    - inability to require specific compiler version for a main target.
     - incorrect behaviour of "bjam msvc" when msvc is configured with explicit
       version.
-    
+
 Thanks to Christopher Currie, Pedro Ferreira and Michael Stevens, who
 contributed to this release.
 
 
-    
 
