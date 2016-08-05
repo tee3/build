@@ -1,8 +1,13 @@
-Copyright 2004-2007 Vladimir Prus
-Distributed under the Boost Software License, Version 1.0.
-(See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+:Copyright:
+   Copyright 2004-2007 Vladimir Prus
+:License:
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
+.. contents::
 
 Milestone 13 (in development)
+-----------------------------
 
 Changes in this release:
 
@@ -11,6 +16,7 @@ The following bugs were fixed:
     - gcc support did not work on HP-UX systems
 
 Milestone 12 (Oct 1, 2007)
+--------------------------
 
 Changes in this release:
 
@@ -29,23 +35,22 @@ Changes in this release:
     - The 'glob' rule accepts patterns to exclude.
     - Inline targets are now marked explicit automatically.
     - Toolsets can now implicitly add requirements to
-    all targets.
+      all targets.
     - New 'generate' rule.
     - The executables produced by the 'run' rule are automatically
-    removed after run.
+      removed after run.
     - The gcc toolset uses the version obtained by running
-    the compiler, if no explicit one is provided.
+      the compiler, if no explicit one is provided.
     - The sun toolset now supports the 'address-model' feature,
-    and uses -KPIC for shared libraries.
+      and uses -KPIC for shared libraries.
     - Free features on command line affect all targets, not
-    just 'directly requested' ones.
-
+      just 'directly requested' ones.
 
 Documentation changes:
 
     - Installation instructions for Linux distributors.
     - Configuration options for all supported C++ compilers
-    are now documented.
+      are now documented.
 
 The following bugs were fixed:
 
@@ -53,18 +58,18 @@ The following bugs were fixed:
     - The intel toolset now works on Windows.
     - Fix library search options for CodeWarriour toolset.
     - The <install-source-root> could cause duplicate
-    mkdir commands.
+      mkdir commands.
     - Numerious fixes in Boost autolink support
     - Numerious fixes in Boost.Python support.
     - Indirect properties not evaluated in usage requirements.
     - Generator that returns a property set but not target is
-    considered successful.
+      considered successful.
     - On Darwin, when several compiler versions
-    are configured, -fcoalesce-templates is applied only to
-    versions that need it.
-
+      are configured, -fcoalesce-templates is applied only to
+      versions that need it.
 
 Milestone 11 (Jule 20, 2006)
+----------------------------
 
 Changes in this release:
 
@@ -136,7 +141,6 @@ The following bugs were fixed:
     - The 'install' rule don't unnecessary scans #includes in installed
       headers.
 
-
 Developer visible changes:
 
     - Ability to customize type's prefix depending on build properties.
@@ -155,8 +159,8 @@ Developer visible changes:
       to using various hacks to invoke base generators when needed.
     - Improve diagnostic for "duplicate actual target" and generator ambiguity.
 
-
 Milestone 10 (October 29, 2004)
+-------------------------------
 
 Changes in this release:
 
@@ -193,7 +197,6 @@ Changes in this release:
     MSVC: Before resource files compilation, the setup script is invoked.
           Options deprecated in 8.0 are not longer used.
 
-
 The following bugs were fixed:
 
     - The <unit-test> rule did not handle the <library> property (!!!!!!)
@@ -222,8 +225,8 @@ Andre Hentz, Jurgen Hunold, Toon Knapen, Johan Nilsson, Alexey Pakhunov,
 Brock Peabody, Michael Stevens and Zbynek Winkler who contributed
 code to this release.
 
-
 Milestone 9.1 (Nov 6, 2003)
+---------------------------
 
 The following bugs were fixed:
 
@@ -231,6 +234,7 @@ The following bugs were fixed:
     - The gcc toolset used to ignore <threading> property.
 
 Milestone 9 (Nov 6, 2003)
+-------------------------
 
 Changes in this release
 
@@ -266,6 +270,7 @@ Jurgen Hunold, Christopher Currie, and Brock Peabody, who contributed to
 this release.
 
 Milestone 8 (Oct 15, 2003)
+--------------------------
 
 Changes in this release:
 
@@ -283,8 +288,8 @@ The following bugs were fixed:
     - failure to recognize shared libraries with version as such
     - the 'path-constant' rule was mishandling absolute paths on Windows.
 
-
 Milestone 7 (Sep 11, 2003)
+--------------------------
 
 Changes in this release:
 
@@ -311,6 +316,3 @@ The following bugs were fixed:
 
 Thanks to Christopher Currie, Pedro Ferreira and Michael Stevens, who
 contributed to this release.
-
-
-

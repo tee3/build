@@ -1,13 +1,15 @@
-Copyright 2003, 2005, 2006 Vladimir Prus
-Distributed under the Boost Software License, Version 1.0.
-(See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+:Copyright:
+   Copyright 2003, 2005, 2006 Vladimir Prus
+:License:
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-
-   B2 V2 release procedure.
+B2 V2 release procedure.
+========================
 
 [ Must be done from a Unix shell ]
 
-0. Look for all issues for current milestone in the tracker. Close the fixed one,
+1. Look for all issues for current milestone in the tracker. Close the fixed one,
    if not already closed. Move to a later milestone, or fix all the unfixed
    ones.
 
@@ -16,7 +18,7 @@ Distributed under the Boost Software License, Version 1.0.
    Check the download locations in "index.html". Check that "last modified"
    string in index.html is correct.
 
-1. Make sure you don't have any local modification, and create SVN directory
+2. Make sure you don't have any local modification, and create SVN directory
 
 	https://svn.boost.org/svn/boost/branches/build/Milestone_X
 
@@ -27,28 +29,30 @@ Distributed under the Boost Software License, Version 1.0.
 
    to that directory.
 
-2. Run
+3. Run
 
    svn co https://svn.boost.org/svn/boost/branches/build/Milestone_X boost-build
 
-3. Go to "boost-build/build/v2" directory.
+4. Go to ``boost-build/build/v2`` directory.
 
-4. Run "./roll.sh". This will create "boost-build.zip" and
-   "boost-build.tar.bz2" in parent directory, and also upload
+5. Run ``./roll.sh``. This will create ``boost-build.zip`` and
+   ``boost-build.tar.bz2`` in parent directory, and also upload
    new docs to sourceforge.
 
-5. Unpack "boost-build.tar.bz2", and build jam.
+6. Unpack ``boost-build.tar.bz2``, and build jam.
 
-6. Go to "test" and copy "test-config-example.jam" to "test-config.jam".
+7. Go to ``test`` and copy ``test-config-example.jam`` to ``test-config.jam``.
    If you're not ghost, edit test-config.jam to specify all the right paths.
-   Run gcc tests:
+   Run ``gcc`` tests:
+
+   ::
 
       python test_all.py gcc --extras
 
-7. Build all projects in examples-v2, using the bjam binary created at step 4.
-   Note: "threading=multi" might be needed to build QT examples.
+8. Build all projects in ``examples-v2``, using the bjam binary created at step 4.
+   Note: ``threading=multi`` might be needed to build QT examples.
 
-8. Make SF release:
+9. Make SF release:
 
    - Go to
      https://sourceforge.net/project/admin/editpackages.php?group_id=7586
@@ -58,9 +62,11 @@ Distributed under the Boost Software License, Version 1.0.
    - Upload the changelog. Be sure to turn the "Preserve my pre-formatted
      text" checkbox.
 
-   - Rename previously built packages to boost-build-2.0-mXX.tar.bz2
-     and boost-build-2.0-mXX.zip. Upload them to the
-     /incoming directory on ftp://upload.sourceforge.net
+   - Rename previously built packages to ``boost-build-2.0-mXX.tar.bz2``
+     and ``boost-build-2.0-mXX.zip``.
+
+   - Upload them to the ``/incoming`` directory on
+     ftp://upload.sourceforge.net.
 
    - Add those file to release, edit file properties.
 
@@ -70,13 +76,13 @@ Distributed under the Boost Software License, Version 1.0.
 
    - In SF file release interface, send email notice.
 
-9. Announce the release, etc.
+10. Announce the release, etc.
 
-10. Login to SF and update the current-release redirects in
+11. Login to SF and update the current-release redirects in
     /home/groups/b/bo/boost/htdocs/boost-build2/.htaccess.
 
-11. If any issues were found during release in this document or in
+12. If any issues were found during release in this document or in
     test-config-example.jam, commit those changes. The release need
     not be redone, but changes must be committed.
 
-12. Set release date in changes.txt and commit.
+13. Set release date in changes.txt and commit.

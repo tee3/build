@@ -1,7 +1,8 @@
-Copyright 2005 Vladimir Prus
-Distributed under the Boost Software License, Version 1.0.
-(See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
-
+:Copyright:
+  Copyright 2005 Vladimir Prus
+:License:
+  Distributed under the Boost Software License, Version 1.0.
+  (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 Summary
 -------
@@ -17,6 +18,8 @@ Design
 We can achieve the desired effect manually by adding something like this
 to Jamroot:
 
+::
+
   project .... : build-dir [ my-rule-to-compute-build-dir ] ;
 
 Where 'my-rule-to-compute-build-dir' would look at the --build-dir option.
@@ -26,18 +29,26 @@ the 'build-dir' attribute of Jamroots.
 
 If Jamroot contains:
 
+::
+
    project foo ;
 
 and --build-dir options' value if /tmp/build, then we'll act as if Jamroot
 contained:
 
+::
+
    project foo : build-dir /tmp/build/foo ;
 
 If the 'project' rule has explicit 'build-dir':
 
+::
+
    project foo : build-dir bin.v2 ;
 
 then with the same value of --build-dir we'd act as if Jamroot contained:
+
+::
 
    project foo : build-dir /tmp/build/foo/bin.v2 ;
 
@@ -61,17 +72,19 @@ Jamfile (either root or non-root), that declare some project id and some
 build-dir attribute, the following table gives the value of build-dir
 that will actually be used.
 
--------------------------------------------------------------------------------
-Root?    Id      Build-dir attribute   Resulting build dir
--------------------------------------------------------------------------------
-yes      none    *                     --build-dir is ignored, with warning
-yes      'foo'   none                  /tmp/build/foo
-yes      'foo'   'bin.v2'              /tmp/build/foo/bin.v2
-yes      'foo'   '/tmp/bar'            Error [1]
-no       *       none                  --build-dir has no effect, inherited
-                                       build dir is used
-no       *       non-empty             Error [2]
--------------------------------------------------------------------------------
-[1] -- not clear what to do
-[2] -- can be made to work, but non-empty build-dir
-attribute in non-root Jamfile does not make much sense even without --build-dir
+::
+
+   -------------------------------------------------------------------------------
+   Root?    Id      Build-dir attribute   Resulting build dir
+   -------------------------------------------------------------------------------
+   yes      none    *                     --build-dir is ignored, with warning
+   yes      'foo'   none                  /tmp/build/foo
+   yes      'foo'   'bin.v2'              /tmp/build/foo/bin.v2
+   yes      'foo'   '/tmp/bar'            Error [1]
+   no       *       none                  --build-dir has no effect, inherited
+                                          build dir is used
+   no       *       non-empty             Error [2]
+   -------------------------------------------------------------------------------
+   [1] -- not clear what to do
+   [2] -- can be made to work, but non-empty build-dir
+   attribute in non-root Jamfile does not make much sense even without --build-dir
