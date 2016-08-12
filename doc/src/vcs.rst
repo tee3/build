@@ -96,7 +96,7 @@ Reference
 
       import testing ;
 
-      import vcs/vcs ;
+      import vcs ;
       import print ;
 
       path-constant working-directory-root : ../.. ;
@@ -136,7 +136,7 @@ Reference
 
 ``fetch ( vcs : root-url : directory )``
 
-   Fetches the from the URL to the root of the vcs project to the
+   Fetches from the URL to the root of the vcs project to the
    indicated directory using vcs.
 
 ``checkout ( directory : symbolic-ref )``
