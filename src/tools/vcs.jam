@@ -19,7 +19,7 @@ supported-vcs = git svn ;
 
 for vcs in $(supported-vcs)
 {
-  import vcs/vcs-$(vcs) ;
+  import vcs-$(vcs) ;
 }
 
 # Returns a string describing the version control system.

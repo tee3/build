@@ -213,5 +213,5 @@ module, but they are included here for reference.
 Backends
 ~~~~~~~~
 
-- `vcs-git <../../src/tools/vcs/vcs-git.jam>`_
-- `vcs-svn <../../src/tools/vcs/vcs-svn.jam>`_
+- `vcs-git <../../src/tools/vcs-git.jam>`_
+- `vcs-svn <../../src/tools/vcs-svn.jam>`_
