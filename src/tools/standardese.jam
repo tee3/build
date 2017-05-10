@@ -1,0 +1,153 @@
+# Copyright Thomas Brown 2017. Distributed under the Boost
+# Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+# This module defines rules to handle generation of various outputs
+# from source files documented with Standardese comments.
+#
+# The supported transformations are:
+#
+# * Source -> Standardese Commonmark
+# * Source -> Standardese HTML
+# * Source -> Standardese XML
+# * Source -> Standardese Man
+# * Source -> Standardese LaTeX
+#
+# The type of transformation is selected based on the target
+# requested.
+
+import "class" : new ;
+import feature ;
+import generators ;
+import toolset ;
+import type ;
+import project ;
+import targets ;
+import common ;
+import errors ;
+import assert ;
+
+# Make this module into a project.
+project.initialize $(__name__) ;
+project standardese ;
+
+.debug-configuration = [ MATCH ^(--debug-configuration)$ : [ modules.peek : ARGV ] ] ;
+
+feature.extend format : markdown ;
+feature.extend format : commonmark ;
+feature.extend format : xml ;
+feature.extend format : latex ;
+feature.extend format : tex ;
+
+# Use this feature to specify extra configuration parameters to
+# Standardese.  These are translated ...
+feature.feature standardese:parameter : : free ;
+
+# Standardese types
+type.register STANDARDESEDIR : standardesedir : MARKDOWN ;
+
+# Toolset flags.
+toolset.flags standardese.generate DEFAULTS : --color=0 --verbose ;
+toolset.flags standardese.generate FORMAT <format> ;
+toolset.flags standardese.generate INCLUDES <include> ;
+toolset.flags standardese.generate DEFINES <define> ;
+
+# Initialization of toolset.
+#
+# Parameters:
+#
+#   name ? -> the name of the 'standardese' executable or
+#             'standardese' if not specified.
+#
+rule init ( name ? )
+{
+  local command = $(name) ;
+  if ! $(command)
+  {
+    command = standardese ;
+  }
+
+  if ! $(.initialized)
+  {
+    .initialized = true ;
+
+    # @todo more search paths for funny systems?
+    local extra-paths = ;
+
+    local command = [ common.get-invocation-command standardese : standardese : $(command) : $(extra-paths) ] ;
+
+    if ! $(command)
+    {
+      errors.user-error "Could not find Standardese at $(command)." ;
+    }
+
+    .command = $(command) ;
+
+    generators.register-composing standardese.generate : H HPP : STANDARDESEDIR ;
+
+    # The same about Jamfile main target rules.
+    IMPORT $(__name__) : standardese : : standardese ;
+  }
+
+  if $(.debug-configuration)
+  {
+    echo "info: using standardese at $(.command)." ;
+  }
+
+  assert.variable-not-empty .command ;
+
+  if $(name)
+  {
+    if $(name) != $(.command)
+    {
+      errors.user-error "Standardese can only be initialized once." ;
+    }
+  }
+}
+
+rule generate ( target : sources + : properties * )
+{
+  local format = [ feature.get-values <format> : $(properties) ] ;
+
+  # default format to commonmark if unspecified
+  if ! $(format)
+  {
+    format = commonmark ;
+
+    properties += <format>$(format) ;
+  }
+
+  if ! $(format)
+  {
+    errors.user-error "Unable to determine the format requested for $(name)." ;
+  }
+
+  standardese-generate $(target) : $(sources) ;
+}
+
+# @todo for now, this must run in the destination directory
+actions standardese-generate
+{
+  mkdir "$(<[0])"
+  cd "$(<[0])"
+  "$(.command)" "$(DEFAULTS)" -I"$(INCLUDES)" -D"$(DEFINES)" --output.format="$(FORMAT)" "$(>)"
+}
+
+# Declare a main target to convert headers to documentation via Standardese.
+rule standardese ( name : sources + : requirements * : default-build * : usage-requirements * )
+{
+  local project = [ project.current ] ;
+
+  targets.create-typed-target STANDARDESEDIR : $(project)
+    : # name
+      $(name)
+    : # sources
+      $(sources)
+    : # requirements
+      $(requirements)
+    : # default-build
+      $(default-build)
+    : # usage-requirements
+      $(usage-requirements)
+    ;
+}
