@@ -83,7 +83,11 @@ rule init ( name ? )
 
     .command = $(command) ;
 
-    generators.register-composing standardese.generate : H HPP : STANDARDESEDIR ;
+    generators.register-composing standardese.generate-markdown   : H HPP : MARKDOWN(standardese_entities) MARKDOWN(standardese_files) MARKDOWN(doc_%) ;
+    generators.register-composing standardese.generate-html       : H HPP : HTML(standardese_entities)         HTML(standardese_files) HTML(doc_%) ;
+    generators.register-composing standardese.generate-xml        : H HPP : XML(standardese_entities)           XML(standardese_files) XML(doc_%) ;
+    generators.register-composing standardese.generate-man        : H HPP : MANPAGES(standardese_entities) MANPAGES(standardese_files) MANPAGES(doc_%) ;
+    generators.register-composing standardese.generate-latex      : H HPP : TEX(standardese_entities)           TEX(standardese_files) TEX(doc_%) ;
 
     # The same about Jamfile main target rules.
     IMPORT $(__name__) : standardese : : standardese ;
@@ -109,18 +113,21 @@ rule generate ( target : sources + : properties * )
 {
   local format = [ feature.get-values <format> : $(properties) ] ;
 
-  # default format to commonmark if unspecified
-  if ! $(format)
+  local output-format = ;
+  switch $(format)
   {
-    format = commonmark ;
-
-    properties += <format>$(format) ;
+    case markdown : output-format = commonmark ;
+    case latex    : output-format = latex ;
+    case manpages : output-format = man ;
+    case html     : output-format = html ;
+    case xml      : output-format = xml ;
   }
 
-  if ! $(format)
+  if ! $(output-format)
   {
-    errors.user-error "Unable to determine the format requested for $(name)." ;
+    errors.user-error "Unable to determine the output format requested for $(name)." ;
   }
+  FORMAT on $(target) = $(output-format) ;
 
   standardese-generate $(target) : $(sources) ;
 }
