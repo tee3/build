@@ -1,0 +1,432 @@
+# Copyright 2003, 2004 Douglas Gregor
+# Copyright 2003, 2004, 2005 Vladimir Prus
+# Copyright 2006 Rene Rivera
+# Copyright 2017 Thomas Brown
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+# This module defines rules to handle generation of various outputs
+# from source files documented with Standardese comments.
+#
+# The supported transformations are:
+#
+# * Source -> Standardese Commonmark
+# * Source -> Standardese LATEX
+# * Source -> Standardese Man
+# * Source -> Standardese HTML
+# * Source -> Standardese XML
+#
+# The type of transformation is selected based on the target
+# name.
+#
+# * .md -> STANDARDESE_MARKDOWN_MULTIFILE
+# * .tex -> STANDARDESE_LATEX_MULTIFILE
+# * .man -> STANDARDESE_MAN_MULTIFILE
+# * .html -> STANDARDESE_HTML_MULTIFILE
+# * .xml -> STANDARDESE_XML_MULTIFILE
+
+import alias ;
+import boostbook ;
+import "class" : new ;
+import common ;
+import feature ;
+import make ;
+import modules ;
+import generators ;
+import os ;
+import path ;
+import print ;
+import project ;
+import property ;
+import stage ;
+import targets ;
+import toolset ;
+import type ;
+import utility ;
+import xsltproc ;
+import virtual-target ;
+import errors ;
+import assert ;
+
+# Use to specify extra configuration paramters. These get translated into a
+# standardesefile which configures the building of the docs.
+feature.feature standardese:param : : free ;
+
+# Location for images when generating XML
+feature.feature standardese:xml-imagedir : : free ;
+
+# Indicates whether the entire directory should be deleted
+feature.feature standardese.rmdir : off on : optional incidental ;
+
+# Standardese configuration input file.
+type.register STANDARDESEFILE : standardesefile ;
+
+type.register STANDARDESE_MARKDOWN_MULTIFILE : standardese-markdown-dir : MARKDOWN ;
+type.register STANDARDESE_LATEX_MULTIFILE    : standardese-latex-dir    : LATEX ;
+type.register STANDARDESE_MAN_MULTIFILE      : standardese-man-dir    : MANPAGE ;
+type.register STANDARDESE_HTML_MULTIFILE     : standardese-html-dir     : HTML ;
+type.register STANDARDESE_XML_MULTIFILE      : standardese-xml-dir      : XML ;
+
+type.register STANDARDESE_MARKDOWN_REDIRECT : : MARKDOWN ;
+#type.register STANDARDESE_LATEX_REDIRECT    : : LATEX ;
+#type.register STANDARDESE_MAN_REDIRECT      : : MANPAGE ;
+type.register STANDARDESE_HTML_REDIRECT     : : HTML ;
+#type.register STANDARDESE_XML_REDIRECT      : : XML ;
+
+feature.feature standardese-format : commonmark latex man html xml : free ;
+
+toolset.flags standardese.run DEFAULTS : --color=0 --verbose ;
+toolset.flags standardese.run FORMAT <standardese-format> ;
+toolset.flags standardese.run INCLUDES <include> ;
+toolset.flags standardese.run DEFINES <define> ;
+
+# Initialization the Standardese module.
+#
+# Parameters:
+#
+#   name ? -> the name of the 'standardese' executable or
+#             'standardese' if not specified.
+#
+rule init ( name ? )
+{
+  local command = $(name) ;
+  if ! $(command)
+  {
+    command = standardese ;
+  }
+
+  if ! $(.initialized)
+  {
+    .initialized = true ;
+
+    # @todo more search paths for funny systems?
+    local extra-paths = ;
+
+    local command = [ common.get-invocation-command standardese : standardese : $(command) : $(extra-paths) ] ;
+
+    if ! $(command)
+    {
+      errors.user-error "Could not find Standardese at $(command)." ;
+    }
+
+    .command = $(command) ;
+
+    generators.register-composing standardese.headers-to-standardesefile : HPP : STANDARDESEFILE ;
+
+    generators.register-composing standardese.run : STANDARDESEFILE H HPP : STANDARDESE_MARKDOWN_MULTIFILE ;
+    generators.register-composing standardese.run : STANDARDESEFILE H HPP : STANDARDESE_LATEX_MULTIFILE ;
+    generators.register-composing standardese.run : STANDARDESEFILE H HPP : STANDARDESE_MAN_MULTIFILE ;
+    generators.register-composing standardese.run : STANDARDESEFILE H HPP : STANDARDESE_HTML_MULTIFILE ;
+    generators.register-composing standardese.run : STANDARDESEFILE H HPP : STANDARDESE_XML_MULTIFILE ;
+
+    generators.register-standard standardese.markdown-redirect : STANDARDESE_MARKDOWN_MULTIFILE : STANDARDESE_MARKDOWN_REDIRECT ;
+#    generators.register-standard standardese.latex-redirect    : STANDARDESE_LATEX_MULTIFILE    : STANDARDESE_LATEX_REDIRECT ;
+#    generators.register-standard standardese.man-redirect      : STANDARDESE_MAN_MULTIFILE      : STANDARDESE_MAN_REDIRECT ;
+    generators.register-standard standardese.html-redirect     : STANDARDESE_HTML_MULTIFILE     : STANDARDESE_HTML_REDIRECT ;
+#    generators.register-standard standardese.xml-redirect      : STANDARDESE_XML_MULTIFILE      : STANDARDESE_XML_REDIRECT ;
+
+    IMPORT $(__name__) : standardese : : standardese ;
+  }
+
+  if $(.debug-configuration)
+  {
+    echo "info: using standardese at $(.command)." ;
+  }
+
+  assert.variable-not-empty .command ;
+
+  if $(name)
+  {
+    if $(name) != $(.command)
+    {
+      errors.user-error "Standardese can only be initialized once." ;
+    }
+  }
+}
+
+# Runs Standardese on the given Standardese configuration file (the source) to generate
+# the Standardese files. The output is dumped according to the settings in the
+# Standardese configuration file, not according to the target! Because of this, we
+# essentially "touch" the target file, in effect making it look like we have
+# really written something useful to it. Anyone that uses this action must deal
+# with this behavior.
+#
+#
+# @todo the pushd / popd are not very portable
+# @todo it would be nice to use the config file for things, but too many seg faults
+# @todo should be a one-liner so all the errors can be checked
+actions standardese-action
+{
+  mkdir "$(HTMLDIR)"
+  pushd "$(HTMLDIR)"
+#  $(RM) "$(*.XML)" & "$(NAME:E=standardese)" "$(DEFAULTS)" -I"$(INCLUDES)" -D"$(DEFINES)" --config="$(>[1])" "$(>[2-])" && echo "Stamped" > "$(<)"
+#  $(RM) "$(*.XML)" & "$(NAME:E=standardese)" "$(DEFAULTS)" -I"$(INCLUDES)" -D"$(DEFINES)" --output.format="$(FORMAT)" "$(>[2-])" && echo "Stamped" > "$(<)"
+  $(RM) "$(*.XML)" & "$(NAME:E=standardese)" "$(DEFAULTS)" -I"$(INCLUDES)" -D"$(DEFINES)" --output.format="$(FORMAT)" "$(>[2-])"
+  popd
+  echo "Stamped" > "$(<)"
+}
+
+
+rule translate-path ( path )
+{
+    if [ os.on-windows ]
+    {
+        if [ os.name ] = CYGWIN
+        {
+            if $(.is-cygwin)
+            {
+                return $(path) ;
+            }
+            else
+            {
+                return $(path:W) ;
+            }
+        }
+        else
+        {
+            if $(.is-cygwin)
+            {
+                match = [ MATCH ^(.):(.*) : $(path) ] ;
+                if $(match)
+                {
+                    return /cygdrive/$(match[1])$(match[2]:T) ;
+                }
+                else
+                {
+                    return $(path:T) ;
+                }
+            }
+            else
+            {
+                return $(path) ;
+            }
+        }
+    }
+    else
+    {
+        return $(path) ;
+    }
+}
+
+
+# Generates a standardese configuration file (standardesefile) given a set of C++ headers
+# and a property list that may contain <standardese:param> features.
+#
+rule headers-to-standardesefile ( target : sources * : properties * )
+{
+  local text = "# Generated by Boost.Build version 2" ;
+
+  local output-dir ;
+
+  # Translate <standardese:param> into command line flags.
+  for local param in [ feature.get-values <standardese:param> : $(properties) ]
+  {
+    local namevalue = [ MATCH ([^=]*)=(.*) : $(param) ] ;
+    if $(namevalue[1]) = OUTPUT_DIRECTORY
+    {
+      output-dir = [ translate-path [ utility.unquote $(namevalue[2]) ] ] ;
+      text += "OUTPUT_DIRECTORY = \"$(output-dir)\"" ;
+    }
+    else
+    {
+      text += "$(namevalue[1]) = $(namevalue[2])" ;
+    }
+  }
+
+  if ! $(output-dir)
+  {
+    output-dir = [ translate-path [ on $(target) return $(LOCATE) ] ] ;
+    text += "OUTPUT_DIRECTORY = \"$(output-dir)\"" ;
+  }
+
+  local headers ;
+  for local header in $(sources:G=)
+  {
+    header = [ translate-path $(header) ] ;
+    headers += \"$(header)\" ;
+  }
+
+  # Standardese generates LaTex by default. So disable it unconditionally, or at
+  # least until someone needs, and hence writes support for, LaTex output.
+  text += "GENERATE_LATEX = NO" ;
+  text += "INPUT = $(headers:J= )" ;
+
+  text = "" ;
+
+  print.output $(target) plain ;
+  print.text $(text) : true ;
+}
+
+
+# Run Standardese. See standardese-action for a description of the strange properties of
+# this rule.
+#
+rule run ( target : sources + : properties * )
+{
+  local output-dir = [ path.make [ MATCH <standardese:param>OUTPUT_DIRECTORY=\"?([^\"]*) : $(properties) ] ] ;
+  local html-dir = [ path.make [ MATCH <standardese:param>HTML_OUTPUT=(.*) : $(properties) ] ] ;
+
+  HTMLDIR on $(target) = [ path.native [ path.join $(output-dir) $(html-dir) ] ] ;
+
+  if <standardese.rmdir>on in $(properties)
+  {
+    if $(output-dir) && $(html-dir) && [ path.glob $(output-dir) : $(html-dir) ]
+    {
+      rm-htmldir $(target) ;
+    }
+  }
+
+  standardese-action $(target) : $(sources) ;
+  NAME on $(target) = $(.command) ;
+  RM on $(target) = [ modules.peek common : RM ] ;
+  *.XML on $(target) = [ path.native [ path.join [ path.make [ on $(target) return $(LOCATE) ] ] $(target:B:S=) *.xml ] ] ;
+}
+
+
+if [ os.name ] = NT
+{
+  RMDIR = rmdir /s /q ;
+}
+else
+{
+  RMDIR = rm -rf ;
+}
+
+actions quietly rm-htmldir
+{
+  $(RMDIR) $(HTMLDIR)
+}
+
+
+# Generate the Markdown redirect to Markdown dir index.md file.
+#
+rule markdown-redirect ( target : source : properties * )
+{
+  local uri = "$(target:B)/standardese_entities.md" ;
+
+  print.output $(target) plain ;
+  print.text
+    "[index]($(uri))"
+  :
+    true
+  ;
+}
+
+# Generate the HTML redirect to HTML dir index.html file.
+#
+rule html-redirect ( target : source : properties * )
+{
+  local uri = "$(target:B)/index.html" ;
+  print.output $(target) plain ;
+  print.text
+  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+  <html xmlns=\"http://www.w3.org/1999/xhtml\">
+  <head>
+  <meta http-equiv=\"refresh\" content=\"0; URL=$(uri)\" />
+
+  <title></title>
+  </head>
+
+  <body>
+  Automatic redirection failed, please go to <a href=
+  \"$(uri)\">$(uri)</a>.
+  </body>
+  </html>
+  "
+  : true ;
+}
+
+project.initialize $(__name__) ;
+project standardese ;
+
+# User-level rule to generate documentation from a set of header
+# files.
+#
+rule standardese ( target : sources + : requirements * : default-build * : usage-requirements * )
+{
+  requirements += <format>none ;
+  local project = [ project.current ] ;
+
+  switch $(target:S)
+  {
+    case .html : format = html     ; type = HTML ;
+    case .md   : format = markdown ; type = MARKDOWN ;
+  }
+
+  if ! $(format)
+  {
+    errors.user-error "Unknown format $(format)." ;
+  }
+
+  if true
+  {
+    # Build an documentation file directory from the sources.
+    local doc-location = [ feature.get-values <location> : $(requirements) ] ;
+    local output-dir ;
+    if [ $(project).get build-dir ]
+    {
+      # Explicitly specified build dir. Add the format string at the end.
+      output-dir = [ path.join [ $(project).build-dir ] $(doc-location:E=$(format)) ] ;
+    }
+    else
+    {
+      # Trim 'bin' from implicit build dir, for no other reason than backward compatibility.
+      output-dir = [ path.join [ path.parent [ $(project).build-dir ] ] $(doc-location:E=$(format)) ] ;
+    }
+    output-dir = [ path.root $(output-dir) [ path.pwd ] ] ;
+    local output-dir-native = [ path.native $(output-dir) ] ;
+    requirements = [ property.change $(requirements) : <location> ] ;
+
+    # The standardese configuration file.
+    targets.create-typed-target STANDARDESEFILE
+      : $(project)
+      : $(target:S=.tag)
+      : $(sources)
+      : $(requirements)
+        <standardese:param>GENERATE_HTML=YES
+        <standardese:param>GENERATE_XML=NO
+        <standardese:param>"OUTPUT_DIRECTORY=\"$(output-dir-native)\""
+        <standardese:param>HTML_OUTPUT=$(target:B)
+      : $(default-build)
+      ;
+    $(project).mark-target-as-explicit $(target:S=.tag) ;
+
+    # The documentation directory to generate by running standardese.
+    targets.create-typed-target STANDARDESE_$(type)_MULTIFILE
+      : $(project)
+      : $(target:S=.dir)
+      : $(target:S=.tag) $(sources)
+      : $(requirements)
+        <standardese:param>"OUTPUT_DIRECTORY=\"$(output-dir-native)\""
+        <standardese:param>HTML_OUTPUT=$(target:B)
+      : $(default-build)
+      ;
+    $(project).mark-target-as-explicit $(target:S=.dir) ;
+
+    local redirect = ;
+    switch $(format)
+    {
+      case markdown : redirect = 1 ;
+      case html     : redirect = 1 ;
+    }
+
+    if $(redirect)
+    {
+      # The redirect file into the generated documentation.
+      targets.create-typed-target STANDARDESE_$(type)_REDIRECT
+        : $(project)
+        : $(target)
+        : $(target:S=.dir)
+        : $(requirements)
+          <location>$(output-dir)
+        : $(default-build)
+        ;
+    }
+  }
+  else
+  {
+    errors.user-error "Target type is not supported yet." ;
+  }
+}
