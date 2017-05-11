@@ -7,11 +7,11 @@
 #
 # The supported transformations are:
 #
-# * Source -> Standardese Commonmark
+# * Source -> Standardese Markdown
+# * Source -> Standardese LaTeX
+# * Source -> Standardese Man
 # * Source -> Standardese HTML
 # * Source -> Standardese XML
-# * Source -> Standardese Man
-# * Source -> Standardese LaTeX
 #
 # The type of transformation is selected based on the target
 # requested.
@@ -33,22 +33,20 @@ project standardese ;
 
 .debug-configuration = [ MATCH ^(--debug-configuration)$ : [ modules.peek : ARGV ] ] ;
 
+# @todo probably needs to be in the format feature specification or a different feature
 feature.extend format : markdown ;
-feature.extend format : commonmark ;
-feature.extend format : xml ;
 feature.extend format : latex ;
-feature.extend format : tex ;
+feature.extend format : xml ;
 
 # Use this feature to specify extra configuration parameters to
 # Standardese.  These are translated ...
 feature.feature standardese:parameter : : free ;
 
-# Standardese types
-type.register STANDARDESEDIR : standardesedir : MARKDOWN ;
+type.register STANDARDESE_HTML_REDIRECT : : HTML ;
+type.register STANDARDESE_HTML_MULTIFILE : html-dir : HTML ;
 
 # Toolset flags.
 toolset.flags standardese.generate DEFAULTS : --color=0 --verbose ;
-toolset.flags standardese.generate FORMAT <format> ;
 toolset.flags standardese.generate INCLUDES <include> ;
 toolset.flags standardese.generate DEFINES <define> ;
 
@@ -83,7 +81,16 @@ rule init ( name ? )
 
     .command = $(command) ;
 
-    generators.register-composing standardese.generate : H HPP : STANDARDESEDIR ;
+    # generators.register-composing standardese.generate   : HPP : MARKDOWN(standardese_entities) MARKDOWN(standardese_files) MARKDOWN(doc_%) ;
+    # generators.register-composing standardese.generate       : HPP : HTML(standardese_entities)         HTML(standardese_files) HTML(doc_%) ;
+    # generators.register-composing standardese.generate        : HPP : XML(standardese_entities)           XML(standardese_files) XML(doc_%) ;
+    # generators.register-composing standardese.generate        : HPP : MANPAGES(standardese_entities) MANPAGES(standardese_files) MANPAGES(doc_%) ;
+    # generators.register-composing standardese.generate      : HPP : TEX(standardese_entities)           TEX(standardese_files) TEX(doc_%) ;
+
+    generators.register [ new standardese-generator standardese.generate : H HPP : STANDARDESE_HTML_MULTIFILE ] ;
+
+    generators.register-standard standardese.html-redirect : STANDARDESE_HTML_MULTIFILE : STANDARDESE_HTML_REDIRECT ;
+
 
     # The same about Jamfile main target rules.
     IMPORT $(__name__) : standardese : : standardese ;
@@ -105,44 +112,61 @@ rule init ( name ? )
   }
 }
 
-rule generate ( target : sources + : properties * )
-{
-  local format = [ feature.get-values <format> : $(properties) ] ;
+# rule generate ( target : sources + : properties * )
+# {
+#   echo $(target) ;
+#   echo $(sources) ;
+#   echo $(properties) ;
 
-  # default format to commonmark if unspecified
-  if ! $(format)
-  {
-    format = commonmark ;
+#   local format = [ feature.get-values <format> : $(properties) ] ;
 
-    properties += <format>$(format) ;
-  }
+#   local output-format = ;
+#   switch $(format)
+#   {
+#     case markdown : output-format = commonmark ;
+#     case latex    : output-format = latex ;
+#     case manpages : output-format = man ;
+#     case html     : output-format = html ;
+#     case xml      : output-format = xml ;
+#   }
 
-  if ! $(format)
-  {
-    errors.user-error "Unable to determine the format requested for $(name)." ;
-  }
+#   if ! $(output-format)
+#   {
+#     errors.user-error "Unable to determine the output format requested for $(name)." ;
+#   }
+#   FORMAT on $(target) = $(output-format) ;
 
-  standardese-generate $(target) : $(sources) ;
-}
+#   standardese.generate $(target) : $(sources) ;
+# }
 
 # @todo for now, this must run in the destination directory
-actions standardese-generate
+actions together standardese.generate
 {
-  mkdir "$(<[0])"
-  cd "$(<[0])"
+  cd "$(<[0]:D)"
   "$(.command)" "$(DEFAULTS)" -I"$(INCLUDES)" -D"$(DEFINES)" --output.format="$(FORMAT)" "$(>)"
 }
 
 # Declare a main target to convert headers to documentation via Standardese.
 rule standardese ( name : sources + : requirements * : default-build * : usage-requirements * )
 {
+  echo ------------- ;
+  echo $(name) ;
+  echo $(sources) ;
+  echo $(requirements) ;
+  echo $(default-build) ;
+  echo $(usage-requirements) ;
+  echo ------------- ;
+
   local project = [ project.current ] ;
 
-  targets.create-typed-target STANDARDESEDIR : $(project)
+  local directory = $(name:S=) ;
+
+  assert.variable-not-empty directory ;
+
+  targets.create-typed-target STANDARDESE_HTML_REDIRECT : $(project)
     : # name
-      $(name)
+      $(directory)/$(name)
     : # sources
-      $(sources)
     : # requirements
       $(requirements)
     : # default-build
@@ -150,4 +174,109 @@ rule standardese ( name : sources + : requirements * : default-build * : usage-r
     : # usage-requirements
       $(usage-requirements)
     ;
+
+  # targets.create-typed-target HTML : $(project)
+  #   : # name
+  #     $(directory)/standardese_entities.md
+  #   : # sources
+  #   : # requirements
+  #     $(requirements)
+  #   : # default-build
+  #     $(default-build)
+  #   : # usage-requirements
+  #     $(usage-requirements)
+  #   ;
+
+  # targets.create-typed-target HTML : $(project)
+  #   : # name
+  #     $(directory)/standardese_files.md
+  #   : # sources
+  #   : # requirements
+  #     $(requirements)
+  #   : # default-build
+  #     $(default-build)
+  #   : # usage-requirements
+  #     $(usage-requirements)
+  #   ;
+
+  # for s in $(sources)
+  # {
+  #   targets.create-typed-target HTML : $(project)
+  #     : # name
+  #       $(directory)/doc_$(s:B:S=.md)
+  #     : # sources
+  #       $(s)
+  #     : # requirements
+  #       $(requirements)
+  #     : # default-build
+  #       $(default-build)
+  #     : # usage-requirements
+  #       $(usage-requirements)
+  #     ;
+  # }
+}
+
+
+
+class standardese-generator : generator
+{
+  rule __init__ ( * : * : *  )
+  {
+    generator.__init__ $(1) : $(2) : $(3) ;
+  }
+
+  rule run ( project name ? : property-set : sources * )
+  {
+    echo $(project) ;
+    echo $(name) ;
+    echo $(property-set) ;
+    echo $(sources) ;
+
+    local results = ;
+
+    for s in $(sources)
+    {
+      local a = [ new action $(s) : standardese.generate : $(property-set) ] ;
+
+      local target = [ new file-target $(name) : HTML : $(project) : $(a) ] ;
+
+      local r = [ virtual-target.register $(target) ] ;
+
+      # Since this generator will return a H target, the linking generator
+      # won't use it at all, and won't set any dependency on it. However, we
+      # need the target to be seen by bjam, so that dependency from sources to
+      # this generated header is detected -- if jam does not know about this
+      # target, it won't do anything.
+      DEPENDS all : [ $(r).actualize ] ;
+
+      results += $(r) ;
+    }
+
+    return $(result) ;
+  }
+}
+
+# Generate the HTML redirect to HTML dir index.html file.
+#
+rule html-redirect ( target : source : properties * )
+{
+    local uri = "$(target:B)/index.html" ;
+    print.output $(target) plain ;
+    print.text
+"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+<html xmlns=\"http://www.w3.org/1999/xhtml\">
+<head>
+  <meta http-equiv=\"refresh\" content=\"0; URL=$(uri)\" />
+
+  <title></title>
+</head>
+
+<body>
+  Automatic redirection failed, please go to <a href=
+  \"$(uri)\">$(uri)</a>.
+</body>
+</html>
+"
+        : true ;
 }
